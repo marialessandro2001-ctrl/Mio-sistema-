@@ -1,1320 +1,850 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Il Mio Sistema — v1</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
-<style>
-/* ============================================================
-   ROOT & RESET
-   Il Mio Sistema v1 — Dashboard, Spese, Lavoro, Obiettivi
-   Dati salvati in localStorage — nessun server esterno
-   ============================================================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feedet — Analisi Preventivo Gratuita</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@200;300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+```
 :root {
-  --bg:        #0a0a0a;
-  --bg2:       #111111;
-  --bg3:       #181818;
-  --bg4:       #202020;
-  --border:    #2c2c2c;
-  --border2:   #383838;
-  --text:      #efefef;
-  --text2:     #aaaaaa;
-  --text3:     #666666;
-  --accent:    #e8ff47;
-  --accent-d:  #b8cc1f;
-  --green:     #4ade80;
-  --red:       #f87171;
-  --orange:    #fb923c;
-  --blue:      #60a5fa;
-  --purple:    #a78bfa;
+  --dark:      #08121e;
+  --dark2:     #0d1c2e;
+  --dark3:     #142038;
+  --blue:      #1e5faa;
+  --blue-l:    #2d7dd2;
+  --blue-pale: #eaf2fb;
+  --accent:    #5aaae8;
+  --bg:        #f2f5f9;
+  --white:     #ffffff;
+  --border:    #dce8f4;
+  --text:      #0c1e34;
+  --text2:     #2a4a6a;
+  --text3:     #6a8aaa;
+  --text4:     #a0bcd4;
+  --green:     #0a7a4a;
   --r:         10px;
   --r-lg:      16px;
-  --shadow:    0 4px 24px rgba(0,0,0,0.4);
 }
 
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato', sans-serif;
   font-size: 15px;
   min-height: 100vh;
-  padding-bottom: 100px;
 }
 
-/* ============================================================ LAYOUT */
-.app { max-width: 480px; margin: 0 auto; padding: 0 16px; }
-
-/* ============================================================ NAVBAR */
-.navbar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,10,10,0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
+/* ══ TOP BAR ══ */
+.topbar {
+  background: var(--dark);
+  padding: 14px 22px;
   display: flex;
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  gap: 4px; padding: 6px 0; background: none; border: none;
-  cursor: pointer; color: var(--text3); font-family: 'DM Sans', sans-serif;
-  font-size: 10px; font-weight: 500; text-transform: uppercase;
-  letter-spacing: 0.05em; transition: color 0.2s;
-}
-.nav-btn.active { color: var(--accent); }
-.nav-btn svg { width: 20px; height: 20px; }
-
-/* ============================================================ HEADER */
-.page-header {
-  padding: 20px 0 4px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.page-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800; font-size: 1.5rem;
-  letter-spacing: -0.04em;
-}
-.page-subtitle { font-size: 0.8rem; color: var(--text3); margin-top: 2px; }
-
-/* ============================================================ SECTIONS */
-.section { display: none; }
-.section.active { display: block; }
-
-/* ============================================================ CARDS */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 18px;
-  margin-bottom: 12px;
-}
-.card-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700; font-size: 0.78rem;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text3); margin-bottom: 14px;
-  display: flex; align-items: center; justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-/* ============================================================ DASHBOARD */
-.balance-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 24px 20px 20px;
-  margin-bottom: 12px;
-  position: relative; overflow: hidden;
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-.balance-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--green), transparent);
-}
-.balance-label { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-.balance-amount {
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: 2.4rem; letter-spacing: -0.05em;
+
+.logo {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 200;
+  font-size: 1.5rem;
+  letter-spacing: 0.16em;
+  color: #e8ecf4;
+  position: relative;
+  display: inline-block;
   line-height: 1;
 }
-.balance-amount.positive { color: var(--green); }
-.balance-amount.negative { color: var(--red); }
-.balance-amount.neutral  { color: var(--text); }
-.balance-sub { font-size: 0.78rem; color: var(--text3); margin-top: 8px; }
 
-.stats-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 12px;
+/* Linea flusso sotto logo */
+.logo-flow {
+  width: 100%;
+  height: 8px;
+  display: block;
 }
-.stat-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px;
-}
-.stat-card .s-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-.stat-card .s-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.03em; }
-.stat-card .s-value.g { color: var(--green); }
-.stat-card .s-value.r { color: var(--red); }
-.stat-card .s-value.o { color: var(--orange); }
-.stat-card .s-value.b { color: var(--blue); }
 
-/* Alerts */
-.alert-item {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  background: rgba(90,170,232,0.08);
+  border: 1px solid rgba(90,170,232,0.18);
+  padding: 2px 8px;
+  border-radius: 100px;
+  width: fit-content;
 }
-.alert-item:last-child { border-bottom: none; padding-bottom: 0; }
-.alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.alert-dot.warn { background: var(--orange); }
-.alert-dot.info { background: var(--blue); }
-.alert-dot.ok   { background: var(--green); }
-.alert-text { font-size: 0.83rem; color: var(--text2); line-height: 1.4; }
-.alert-text strong { color: var(--text); font-weight: 600; }
+.logo-badge::before {
+  content: '';
+  width: 4px; height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-/* Recent transactions */
-.tx-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 0; border-bottom: 1px solid var(--border);
+.topbar-right {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.1em;
+  text-align: right;
 }
-.tx-item:last-child { border-bottom: none; padding-bottom: 0; }
-.tx-left { display: flex; align-items: center; gap: 10px; }
-.tx-icon {
-  width: 34px; height: 34px; border-radius: 8px;
+
+/* ══ HERO ══ */
+.hero {
+  background: linear-gradient(170deg, var(--dark) 0%, var(--dark2) 50%, var(--dark3) 100%);
+  padding: 36px 22px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Roccia sfondo */
+.hero-rock {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 35%;
+  z-index: 0;
+  opacity: 0.2;
+}
+
+/* Atmosfera */
+.hero-atm {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 50% 60% at 20% 50%, rgba(30,95,170,0.1) 0%, transparent 70%);
+  z-index: 1;
+}
+
+/* Contenuto hero */
+.hero-inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+
+.hero-text {
+  flex: 1;
+  padding-bottom: 36px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.55);
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 5px 11px;
+  border-radius: 100px;
+  margin-bottom: 18px;
+}
+.hero-pill::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.hero-h1 {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 200;
+  font-size: clamp(1.9rem, 5.5vw, 2.8rem);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.hero-h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 0.86rem;
+  color: rgba(255,255,255,0.42);
+  line-height: 1.65;
+  font-weight: 300;
+  max-width: 260px;
+  margin-bottom: 26px;
+}
+
+/* Stats */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  overflow: hidden;
+  width: fit-content;
+}
+.hstat {
+  padding: 10px 16px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.hstat:last-child { border-right: none; }
+.hstat .n {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 300;
+  font-size: 1.2rem;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.hstat .l {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* Mascotte */
+.mascot-wrap {
+  width: 175px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+.mascot-bubble {
+  position: absolute;
+  top: 0;
+  left: -15px;
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px 12px 12px 0;
+  padding: 9px 12px;
+  max-width: 145px;
+  z-index: 10;
+}
+.mascot-bubble p {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.78);
+  line-height: 1.45;
+}
+.mascot-bubble strong { color: #fff; }
+
+.mascot-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px; height: 30px;
+  background: radial-gradient(ellipse, rgba(30,95,170,0.35) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.mascot-circle {
+  width: 165px; height: 165px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, rgba(42,100,180,0.18) 0%, rgba(8,18,30,0.7) 100%);
+  border: 1px solid rgba(90,170,232,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 50%;
+}
+
+.mascot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.35;
+}
+
+
+/* ══ MAIN ══ */
+.main {
+  background: var(--bg);
+  padding: 28px 16px 56px;
+}
+.container {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* Steps */
+.steps-wrap { padding: 24px 0 22px; }
+.section-lbl {
+  font-size: 0.63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--text3); margin-bottom: 14px;
+}
+.step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 9px 0; position: relative;
+}
+.step:not(:last-child)::after {
+  content: ''; position: absolute;
+  left: 13px; top: 35px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.step-n {
+  width: 27px; height: 27px; border-radius: 50%;
+  background: var(--blue-pale); border: 1.5px solid var(--blue-l);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; background: var(--bg3); flex-shrink: 0;
+  font-family: 'Crimson Pro', serif; font-weight: 400; font-size: 0.82rem;
+  color: var(--blue); flex-shrink: 0; position: relative; z-index: 1;
 }
-.tx-name { font-size: 0.88rem; font-weight: 500; }
-.tx-cat { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
-.tx-amount { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; }
-.tx-amount.neg { color: var(--red); }
-.tx-amount.pos { color: var(--green); }
+.step-b strong { display: block; font-size: 0.84rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+.step-b span { font-size: 0.76rem; color: var(--text3); line-height: 1.4; }
 
-/* ============================================================ FORMS */
-.form-group { margin-bottom: 14px; }
-.form-label {
-  display: block; font-size: 0.75rem; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 6px;
+/* Form card */
+.form-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 4px 28px rgba(8,18,30,0.08);
+  overflow: hidden;
 }
-.form-input, .form-select, .form-textarea {
-  width: 100%; background: var(--bg3);
-  border: 1px solid var(--border); border-radius: var(--r);
-  color: var(--text); font-family: 'DM Sans', sans-serif;
-  font-size: 0.92rem; padding: 11px 14px; outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+
+.form-head {
+  background: var(--dark);
+  padding: 18px 22px;
+  position: relative;
+  overflow: hidden;
+}
+.form-head::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(90,170,232,0.3), transparent);
+}
+.form-head h2 {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 300; font-size: 1.05rem;
+  color: #e8ecf4; margin-bottom: 3px;
+  letter-spacing: 0.05em;
+}
+.form-head p { font-size: 0.73rem; color: rgba(255,255,255,0.35); }
+
+.form-body { padding: 20px 22px; }
+
+/* Fields */
+.fg { margin-bottom: 14px; }
+.fl {
+  display: block; font-size: 0.74rem; font-weight: 700;
+  color: var(--text2); margin-bottom: 5px;
+}
+.fl .r { color: var(--blue-l); }
+.fl .o { color: var(--text4); font-weight: 400; }
+
+input[type=text], input[type=tel], input[type=number], select, textarea {
+  width: 100%; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--r);
+  color: var(--text); font-family: 'Lato', sans-serif;
+  font-size: 0.9rem; padding: 11px 13px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   -webkit-appearance: none;
 }
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(232,255,71,0.07);
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue); background: #fff;
+  box-shadow: 0 0 0 3px rgba(30,95,170,0.07);
 }
-.form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
-.form-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 14px center;
-  padding-right: 36px; cursor: pointer;
+input::placeholder, textarea::placeholder { color: var(--text4); }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236a8aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+  background-color: var(--bg); padding-right: 34px; cursor: pointer;
 }
-.form-select option { background: var(--bg3); }
-.form-textarea { resize: vertical; min-height: 80px; }
+select option { background: #fff; color: var(--text); }
+textarea { resize: vertical; min-height: 78px; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* Radio */
+.rgroup { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ropt { position: relative; }
+.ropt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ropt label {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 10px 8px;
+  cursor: pointer; font-size: 0.81rem; font-weight: 700;
+  color: var(--text3); transition: all 0.2s; text-align: center;
+}
+.ropt input:checked + label {
+  border-color: var(--blue); background: var(--blue-pale); color: var(--blue);
+}
+.ropt label:hover { border-color: var(--blue-l); color: var(--blue); }
 
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 6px; padding: 12px 20px; border-radius: var(--r);
-  font-family: 'Syne', sans-serif; font-weight: 700;
-  font-size: 0.88rem; letter-spacing: -0.01em;
-  border: none; cursor: pointer; transition: all 0.2s;
+/* Conditional */
+.cond {
+  overflow: hidden; max-height: 0; opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+  margin-bottom: 0;
+}
+.cond.on { max-height: 82px; opacity: 1; margin-bottom: 14px; }
+
+/* File upload */
+.fupload {
+  border: 1.5px dashed #c4d8ec; border-radius: var(--r);
+  padding: 18px 12px; text-align: center; cursor: pointer;
+  position: relative; background: var(--bg); transition: all 0.2s;
+}
+.fupload:hover { border-color: var(--blue); background: var(--blue-pale); }
+.fupload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.fupload .fi { font-size: 1.3rem; margin-bottom: 5px; }
+.fupload .ft { font-size: 0.77rem; color: var(--text3); line-height: 1.4; }
+.fupload .ft strong { color: var(--blue); }
+.fname { margin-top: 6px; font-size: 0.73rem; color: var(--blue); font-weight: 700; display: none; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* Submit */
+.btn-sub {
   width: 100%;
-}
-.btn-primary { background: var(--accent); color: #0a0a0a; }
-.btn-primary:hover { background: var(--accent-d); transform: translateY(-1px); }
-.btn-danger { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
-.btn-danger:hover { background: rgba(248,113,113,0.2); }
-.btn-sm { padding: 7px 14px; font-size: 0.78rem; width: auto; }
-
-/* Toggle tipo entrata/uscita */
-.type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.type-btn {
-  padding: 10px; border-radius: var(--r); border: 1px solid var(--border);
-  background: var(--bg3); color: var(--text3); font-family: 'Syne', sans-serif;
-  font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
-  text-align: center;
-}
-.type-btn.active-uscita { border-color: var(--red); background: rgba(248,113,113,0.08); color: var(--red); }
-.type-btn.active-entrata { border-color: var(--green); background: rgba(74,222,128,0.08); color: var(--green); }
-
-/* ============================================================ LISTE */
-.list-item {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px; margin-bottom: 8px;
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 12px;
-}
-.list-item-info { flex: 1; min-width: 0; }
-.list-item-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.list-item-meta { font-size: 0.75rem; color: var(--text3); }
-.list-item-right { text-align: right; flex-shrink: 0; }
-.list-item-amount { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.95rem; }
-.list-item-date { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
-
-/* Badge stato */
-.badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; border-radius: 100px;
-  font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-}
-.badge-green  { background: rgba(74,222,128,0.1);  color: var(--green); }
-.badge-orange { background: rgba(251,146,60,0.1);  color: var(--orange); }
-.badge-blue   { background: rgba(96,165,250,0.1);  color: var(--blue); }
-.badge-red    { background: rgba(248,113,113,0.1); color: var(--red); }
-.badge-purple { background: rgba(167,139,250,0.1); color: var(--purple); }
-
-/* ============================================================ PROGRESS */
-.progress-bar-wrap { background: var(--bg3); border-radius: 100px; height: 8px; overflow: hidden; margin: 8px 0; }
-.progress-bar { height: 100%; border-radius: 100px; transition: width 0.5s ease; }
-.progress-bar.green  { background: var(--green); }
-.progress-bar.orange { background: var(--orange); }
-.progress-bar.red    { background: var(--red); }
-.progress-bar.blue   { background: var(--blue); }
-.progress-bar.accent { background: var(--accent); }
-
-/* ============================================================ OBIETTIVI */
-.obj-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 18px; margin-bottom: 10px;
-}
-.obj-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
-.obj-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
-.obj-emoji { font-size: 1.3rem; margin-bottom: 4px; }
-.obj-amounts { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text3); margin-top: 6px; }
-.obj-amounts .current { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 0.85rem; font-weight: 500; }
-.obj-amounts .target  { font-family: 'DM Mono', monospace; }
-
-/* ============================================================ ANALISI */
-.analysis-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 18px; margin-bottom: 10px;
-}
-.cat-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.cat-bar-row:last-child { margin-bottom: 0; }
-.cat-bar-label { font-size: 0.8rem; width: 90px; flex-shrink: 0; color: var(--text2); }
-.cat-bar-wrap { flex: 1; background: var(--bg3); border-radius: 100px; height: 6px; }
-.cat-bar-fill { height: 100%; border-radius: 100px; }
-.cat-bar-val { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text3); width: 60px; text-align: right; flex-shrink: 0; }
-
-/* Trend chip */
-.trend-chip {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 7px; border-radius: 100px;
-  font-size: 0.7rem; font-weight: 600;
-}
-.trend-up   { background: rgba(248,113,113,0.12); color: var(--red); }
-.trend-down { background: rgba(74,222,128,0.12);  color: var(--green); }
-.trend-flat { background: rgba(102,102,102,0.2);  color: var(--text3); }
-
-/* ============================================================ MODAL */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
-  display: none; align-items: flex-end;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  width: 100%; max-width: 480px; margin: 0 auto;
-  background: var(--bg2); border-radius: 20px 20px 0 0;
-  border: 1px solid var(--border); border-bottom: none;
-  padding: 20px 20px max(20px, env(safe-area-inset-bottom));
-  max-height: 90vh; overflow-y: auto;
-  animation: slideUp 0.3s ease;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 100px; margin: 0 auto 20px; }
-.modal-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.03em; margin-bottom: 20px; }
-/* ============================================================ FAB */
-.fab {
-  position: fixed; bottom: 80px; right: 20px; z-index: 90;
-  width: 54px; height: 54px; border-radius: 50%;
-  background: var(--accent); color: #0a0a0a;
-  border: none; cursor: pointer; font-size: 1.5rem;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(232,255,71,0.3);
+  background: var(--dark);
+  color: #e8ecf4;
+  font-family: 'Crimson Pro', serif;
+  font-weight: 300; font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  padding: 14px 20px; border: none;
+  border-radius: var(--r); cursor: pointer;
   transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  position: relative; overflow: hidden;
 }
-.fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(232,255,71,0.4); }
+.btn-sub::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, rgba(90,170,232,0.1) 0%, transparent 50%);
+}
+.btn-sub:hover {
+  background: var(--dark3);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(8,18,30,0.28);
+}
+.btn-sub:active { transform: translateY(0); }
+.btn-sub .ar { transition: transform 0.2s; }
+.btn-sub:hover .ar { transform: translateX(4px); }
 
-/* ============================================================ EMPTY */
-.empty-state {
-  text-align: center; padding: 40px 20px; color: var(--text3);
+.btn-note {
+  text-align: center; font-size: 0.7rem;
+  color: var(--text4); margin-top: 8px; line-height: 1.5;
 }
-.empty-state .e-icon { font-size: 2.5rem; margin-bottom: 10px; }
-.empty-state .e-text { font-size: 0.85rem; line-height: 1.5; }
-/* ============================================================ MONTH SELECTOR */
-.month-nav {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 16px;
-}
-.month-nav button {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text2); width: 32px; height: 32px; border-radius: 8px;
-  cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; flex-shrink: 0;
-}
-.month-nav button:hover { border-color: var(--accent); color: var(--accent); }
-.month-nav .month-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; flex: 1; }
 
-/* ============================================================ BACKUP */
-.backup-bar {
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 10px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
+/* Trust bar */
+.trust {
+  display: flex; align-items: center; justify-content: center;
+  gap: 18px; flex-wrap: wrap;
+  padding: 13px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--blue-pale);
 }
-.backup-bar span { font-size: 0.78rem; color: var(--text3); }
+.ti {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.69rem; color: var(--text2); font-weight: 700;
+}
+.ti svg { width: 12px; height: 12px; color: var(--blue); flex-shrink: 0; }
 
-/* ============================================================ UTILITIES */
-.mt-4 { margin-top: 4px; }
-.mt-8 { margin-top: 8px; }
-.mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.mb-8  { margin-bottom: 8px; }
-.flex-between { display: flex; align-items: center; justify-content: space-between; }
-.text-accent { color: var(--accent); }
-.text-green  { color: var(--green); }
-.text-red    { color: var(--red); }
-.text-muted  { color: var(--text3); }
-.text-sm     { font-size: 0.8rem; }
-.font-mono   { font-family: 'DM Mono', monospace; }
-.divider     { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-.section-gap { margin-top: 20px; }
-</style>
+/* Success */
+.success { display: none; text-align: center; padding: 30px 20px; }
+.success .si { font-size: 2.6rem; margin-bottom: 10px; }
+.success .st {
+  font-family: 'Crimson Pro', serif; font-weight: 400;
+  font-size: 1.2rem; color: var(--green); margin-bottom: 8px;
+}
+.success .sp { font-size: 0.83rem; color: var(--text3); line-height: 1.6; }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 18px 16px 36px;
+  font-size: 0.68rem; color: var(--text4); line-height: 1.6;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.topbar { animation: fadeUp 0.4s ease both; }
+.hero   { animation: fadeUp 0.4s 0.05s ease both; }
+.main   { animation: fadeUp 0.4s 0.15s ease both; }
+
+@media(max-width:400px) {
+  .frow, .rgroup { grid-template-columns: 1fr; }
+  .mascot-wrap { width: 145px; }
+  .mascot-circle { width: 138px; height: 138px; }
+  .hero-h1 { font-size: 1.7rem; }
+  .mascot-bubble { display: none; }
+  .hero-stats .hstat { padding: 8px 12px; }
+}
+```
+
+  </style>
 </head>
 <body>
 
-<!-- ============================================================ APP SHELL -->
-<div class="app">
+<!-- TOP BAR -->
 
-  <!-- ===== SEZIONE: DASHBOARD ===== -->
-  <div class="section active" id="sec-dashboard">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Buongiorno 👋</div>
-        <div class="page-subtitle" id="dash-date"></div>
-      </div>
-      <button class="btn btn-sm" onclick="exportBackup()" style="width:auto;background:var(--bg3);border:1px solid var(--border);color:var(--text2)">💾 Backup</button>
-    </div>
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo">
+      feedet
+      <svg class="logo-flow" viewBox="0 0 120 8" fill="none">
+        <defs>
+          <linearGradient id="lf" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#08121e"/>
+            <stop offset="20%" style="stop-color:#2a6ac0;stop-opacity:0.8"/>
+            <stop offset="55%" style="stop-color:#5aaae8;stop-opacity:0.9"/>
+            <stop offset="85%" style="stop-color:#2a6ac0;stop-opacity:0.5"/>
+            <stop offset="100%" style="stop-color:#08121e;stop-opacity:0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 4 C15 2, 35 6, 60 3 C80 1, 100 5, 120 3"
+          stroke="url(#lf)" stroke-width="1" fill="none"/>
+        <path d="M20 5 C40 6.5, 70 4, 100 5.5"
+          stroke="#1a4a8a" stroke-width="0.4" fill="none" opacity="0.4"/>
 
-    <!-- Saldo netto mese -->
-    <div class="balance-card">
-      <div class="balance-label">Saldo netto — <span id="dash-month-label"></span></div>
-      <div class="balance-amount" id="dash-saldo">€ 0,00</div>
-      <div class="balance-sub" id="dash-saldo-sub"></div>
-    </div>
+```
+</div>
+<div class="logo-badge">Analisi gratuita</div>
+```
 
-    <!-- Stats riga -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="s-label">Entrate mese</div>
-        <div class="s-value g" id="dash-entrate">€ 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Uscite mese</div>
-        <div class="s-value r" id="dash-uscite">€ 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Lavori attivi</div>
-        <div class="s-value b" id="dash-lavori-attivi">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Da incassare</div>
-        <div class="s-value o" id="dash-da-incassare">€ 0</div>
-      </div>
-    </div>
+  </div>
+  <div class="topbar-right">Risposta in 24h</div>
+</div>
 
-    <!-- Alert -->
-    <div class="card">
-      <div class="card-title">Alert intelligenti</div>
-      <div id="dash-alerts"><div class="empty-state"><div class="e-icon">✅</div><div class="e-text">Tutto sotto controllo</div></div></div>
-    </div>
+<!-- HERO -->
 
-    <!-- Ultime transazioni -->
-    <div class="card">
-      <div class="card-title">Ultime operazioni</div>
-      <div id="dash-recent"></div>
-    </div>
+<div class="hero">
 
-    <!-- Obiettivi mini -->
-    <div class="card" id="dash-obj-card">
-      <div class="card-title">Obiettivi in corso</div>
-      <div id="dash-obiettivi"></div>
-    </div>
+  <!-- Roccia sfondo destra -->
+
+  <div class="hero-rock">
+    <svg width="100%" height="100%" viewBox="0 0 200 400" preserveAspectRatio="xMaxYMid slice" fill="none">
+      <defs>
+        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#142038"/>
+          <stop offset="100%" style="stop-color:#08121e"/>
+        </linearGradient>
+        <linearGradient id="wg" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#5aaae8;stop-opacity:0.8"/>
+          <stop offset="100%" style="stop-color:#1a4a8a;stop-opacity:0.1"/>
+        </linearGradient>
+      </defs>
+      <path d="M40 400 L40 100 L55 80 L70 92 L84 68 L100 58 L114 68 L126 48 L140 38 L154 50 L166 28 L178 36 L190 18 L200 26 L200 400 Z"
+        fill="url(#rg)"/>
+      <line x1="40" y1="135" x2="200" y2="128" stroke="#1e3450" stroke-width="0.8" opacity="0.6"/>
+      <line x1="40" y1="178" x2="200" y2="171" stroke="#1e3450" stroke-width="0.7" opacity="0.5"/>
+      <line x1="40" y1="221" x2="200" y2="214" stroke="#1e3450" stroke-width="0.6" opacity="0.45"/>
+      <line x1="40" y1="264" x2="200" y2="257" stroke="#1e3450" stroke-width="0.6" opacity="0.4"/>
+      <line x1="40" y1="307" x2="200" y2="300" stroke="#1e3450" stroke-width="0.5" opacity="0.35"/>
+      <line x1="40" y1="350" x2="200" y2="343" stroke="#1e3450" stroke-width="0.5" opacity="0.3"/>
+      <!-- Fessura acqua principale -->
+      <path d="M126 48 C124 100, 130 165, 126 228 C123 270, 128 318, 125 400"
+        stroke="#060c14" stroke-width="2.5" fill="none"/>
+      <path d="M126 48 C124.5 100, 129 165, 126 228 C123.5 270, 127.5 318, 125.5 400"
+        stroke="url(#wg)" stroke-width="1.1" fill="none"/>
+      <!-- Ramificazione -->
+      <path d="M126 228 C112 223, 96 228, 78 222"
+        stroke="#0a1828" stroke-width="1.5" fill="none"/>
+      <path d="M126 228 C112.5 223.5, 96.5 228, 78.5 222.5"
+        stroke="#1a5aaa" stroke-width="0.6" fill="none" opacity="0.5"/>
+
   </div>
 
-  <!-- ===== SEZIONE: SPESE ===== -->
-  <div class="section" id="sec-spese">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Spese</div>
-        <div class="page-subtitle">Personali & lavoro</div>
-      </div>
-    </div>
+  <div class="hero-atm"></div>
 
-    <!-- Month nav -->
-    <div class="month-nav">
-      <button onclick="changeMonth('spese',-1)">‹</button>
-      <div class="month-label" id="spese-month-label"></div>
-      <button onclick="changeMonth('spese',1)">›</button>
-    </div>
+  <!-- Contenuto -->
 
-    <!-- Riepilogo mese -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="s-label">Tot. Uscite</div>
-        <div class="s-value r" id="sp-tot-uscite">€ 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Tot. Entrate</div>
-        <div class="s-value g" id="sp-tot-entrate">€ 0</div>
-      </div>
-    </div>
+  <div class="hero-inner">
 
-    <!-- Analisi per categoria -->
-    <div class="analysis-card">
-      <div class="card-title" style="margin-bottom:14px">Distribuzione uscite</div>
-      <div id="sp-cat-analysis"></div>
-    </div>
+```
+<div class="hero-text">
+  <div class="hero-pill">Servizio gratuito · 24h</div>
+  <h1 class="hero-h1">
+    Il tuo preventivo<br>
+    è <em>davvero giusto?</em>
+  </h1>
+  <p class="hero-sub">
+    Confrontiamo ogni voce con i prezzi reali di mercato. Ti diciamo la verità — senza giri di parole.
+  </p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">24h</div><div class="l">Risposta</div></div>
+    <div class="hstat"><div class="n">100%</div><div class="l">Gratis</div></div>
+    <div class="hstat"><div class="n">−35%</div><div class="l">Risparmio</div></div>
+  </div>
+</div>
 
-    <!-- Lista transazioni -->
-    <div id="sp-list"></div>
+<!-- Mascotte -->
+<div class="mascot-wrap">
+  <div class="mascot-glow"></div>
+  <div class="mascot-bubble">
+    <p><strong>Ciao!</strong> Inviami il tuo preventivo, te lo analizzo gratis in 24h.</p>
+  </div>
+  <div class="mascot-circle">
+    <!--
+      Per inserire Mr. Feedet reale:
+      <img src="URL_IMMAGINE" class="mascot-img" alt="Mr. Feedet"/>
+    -->
+    <div class="mascot-placeholder">
+      <div style="font-size:4.5rem;line-height:1">👷</div>
+      <div style="font-size:0.52rem;letter-spacing:0.1em;color:#3a6a9a;text-transform:uppercase;font-family:'Lato',sans-serif">Mr. Feedet</div>
+    </div>
+  </div>
+</div>
+```
+
   </div>
 
-  <!-- ===== SEZIONE: LAVORI ===== -->
-  <div class="section" id="sec-lavori">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Lavori</div>
-        <div class="page-subtitle">Cantieri & preventivi</div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="s-label">Fatturato YTD</div>
-        <div class="s-value g" id="lav-fatturato">€ 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Da incassare</div>
-        <div class="s-value o" id="lav-pendente">€ 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Margine medio</div>
-        <div class="s-value b" id="lav-margine">0%</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Lavori tot.</div>
-        <div class="s-value" id="lav-count">0</div>
-      </div>
-    </div>
-
-    <!-- Filtro stato -->
-    <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
-      <button class="badge badge-blue" style="cursor:pointer;white-space:nowrap" onclick="filterLavori('tutti')">Tutti</button>
-      <button class="badge badge-orange" style="cursor:pointer;white-space:nowrap" onclick="filterLavori('in_corso')">In corso</button>
-      <button class="badge badge-purple" style="cursor:pointer;white-space:nowrap" onclick="filterLavori('preventivo')">Preventivo</button>
-      <button class="badge badge-green" style="cursor:pointer;white-space:nowrap" onclick="filterLavori('completato')">Completati</button>
-      <button class="badge badge-red" style="cursor:pointer;white-space:nowrap" onclick="filterLavori('non_pagato')">Non pagati</button>
-    </div>
-
-    <div id="lav-list"></div>
   </div>
 
-  <!-- ===== SEZIONE: OBIETTIVI ===== -->
-  <div class="section" id="sec-obiettivi">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Obiettivi</div>
-        <div class="page-subtitle">I tuoi traguardi finanziari</div>
-      </div>
-    </div>
- <!-- Analisi abitudini -->
-    <div class="analysis-card" id="habit-analysis">
-      <div class="card-title" style="margin-bottom:12px">🧠 Analisi abitudini</div>
-      <div id="habit-content"></div>
-    </div>
+</div>
 
-    <div id="obj-list"></div>
+<div style="height:1px;background:rgba(255,255,255,0.08)"></div>
+
+<!-- MAIN -->
+
+<div class="main">
+  <div class="container">
+
+```
+<!-- Steps -->
+<div class="steps-wrap">
+  <div class="section-lbl">Come funziona</div>
+  <div class="step">
+    <div class="step-n">1</div>
+    <div class="step-b">
+      <strong>Invia il preventivo</strong>
+      <span>Carica foto o PDF, o descrivi il lavoro e l'importo</span>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-n">2</div>
+    <div class="step-b">
+      <strong>Analizziamo per te</strong>
+      <span>Voce per voce, con i prezzi reali della tua zona</span>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-n">3</div>
+    <div class="step-b">
+      <strong>Risposta su WhatsApp in 24h</strong>
+      <span>Giusto o troppo caro — te lo diciamo chiaramente</span>
+    </div>
+  </div>
+</div>
+
+<!-- Form -->
+<div class="form-card">
+  <div class="form-head">
+    <h2>Invia il tuo preventivo</h2>
+    <p>Meno di 2 minuti · Nessun impegno · Dati privati</p>
   </div>
 
-</div><!-- /app -->
+  <div class="form-body">
+    <form id="ff" novalidate>
 
-<!-- ============================================================ NAVBAR -->
-<nav class="navbar">
-  <button class="nav-btn active" id="nav-dashboard" onclick="showSection('dashboard')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Dashboard
-  </button>
-  <button class="nav-btn" id="nav-spese" onclick="showSection('spese')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-    Spese
-  </button>
-  <button class="nav-btn" id="nav-lavori" onclick="showSection('lavori')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-    Lavori
-  </button>
-  <button class="nav-btn" id="nav-obiettivi" onclick="showSection('obiettivi')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-    Obiettivi
-  </button>
-</nav>
-
-<!-- ============================================================ FAB -->
-<button class="fab" id="fab-btn" onclick="openFab()">+</button>
-
-<!-- ============================================================ MODALI -->
-
-<!-- Modal: Nuova transazione -->
-<div class="modal-overlay" id="modal-transazione">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuova operazione</div>
-    <div class="type-toggle">
-      <button class="type-btn active-uscita" id="tb-uscita" onclick="setType('uscita')">↓ Uscita</button>
-      <button class="type-btn" id="tb-entrata" onclick="setType('entrata')">↑ Entrata</button>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Importo (€) *</label>
-        <input type="number" class="form-input" id="t-importo" placeholder="0.00" step="0.01" min="0"/>
+      <div class="frow">
+        <div class="fg">
+          <label class="fl">Nome <span class="r">*</span></label>
+          <input type="text" id="nome" placeholder="Mario" required/>
+        </div>
+        <div class="fg">
+          <label class="fl">Provincia <span class="r">*</span></label>
+          <input type="text" id="prov" placeholder="Es. Lodi" required/>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Data *</label>
-        <input type="date" class="form-input" id="t-data"/>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Descrizione *</label>
-      <input type="text" class="form-input" id="t-desc" placeholder="Es. Spesa supermercato"/>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Categoria</label>
-        <select class="form-select" id="t-cat">
-          <option value="casa">🏠 Casa</option>
-          <option value="cibo">🍔 Cibo</option>
-          <option value="trasporti">🚗 Trasporti</option>
-          <option value="salute">💊 Salute</option>
-          <option value="svago">🎉 Svago</option>
-          <option value="abbigliamento">👕 Abbigliamento</option>
-          <option value="formazione">📚 Formazione</option>
-          <option value="vizi">🚬 Vizi</option>
-          <option value="lavoro_uscita">🔧 Costi lavoro</option>
-          <option value="lavoro_entrata">💰 Entrata lavoro</option>
+
+      <div class="fg">
+        <label class="fl">Tipo di lavoro <span class="r">*</span></label>
+        <select id="lav" required>
+          <option value="" disabled selected>Seleziona il tipo di lavoro…</option>
+          <option value="sostituzione_caldaia">🔥 Sostituzione caldaia</option>
+          <option value="installazione_caldaia">🔥 Installazione caldaia nuova</option>
+          <option value="impianto_idraulico">🚿 Impianto idraulico bagno / cucina</option>
+          <option value="riparazione">🔧 Riparazione impianto</option>
+          <option value="riscaldamento">♨️ Impianto riscaldamento</option>
+          <option value="elettrico">⚡ Impianto elettrico</option>
+          <option value="ristrutturazione">🏗️ Ristrutturazione</option>
           <option value="altro">📦 Altro</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Pagamento</label>
-        <select class="form-select" id="t-pag">
-          <option value="contanti">💵 Contanti</option>
-          <option value="carta">💳 Carta</option>
-          <option value="bonifico">🏦 Bonifico</option>
-        </select>
+
+      <div class="fg">
+        <label class="fl">Hai già un preventivo? <span class="r">*</span></label>
+        <div class="rgroup">
+          <div class="ropt">
+            <input type="radio" id="rsi" name="hp" value="si" onclick="toggleImporto()"/>
+            <label for="rsi">✅ Sì, ce l'ho</label>
+          </div>
+          <div class="ropt">
+            <input type="radio" id="rno" name="hp" value="no" onclick="toggleImporto()"/>
+            <label for="rno">🔍 No, ne ho bisogno</label>
+          </div>
+        </div>
       </div>
+
+      <div class="cond" id="iw">
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Importo preventivo (€) <span class="r">*</span></label>
+          <input type="number" id="imp" placeholder="Es. 2400" min="0"/>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Carica il preventivo <span class="o">(opzionale ma consigliato)</span></label>
+        <div class="fupload">
+          <input type="file" id="fi" accept=".pdf,.jpg,.jpeg,.png"/>
+          <div class="fi">📎</div>
+          <div class="ft"><strong>Tocca per caricare</strong> o trascina qui<br>PDF, JPG, PNG — max 10MB</div>
+          <div class="fname" id="fn"></div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+
+      <div class="fg">
+        <label class="fl">WhatsApp / Telefono <span class="r">*</span></label>
+        <input type="tel" id="tel" placeholder="+39 333 000 0000" required/>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Note aggiuntive <span class="o">(opzionale)</span></label>
+        <textarea id="note" placeholder="Dettagli: stato impianto, urgenza, domande specifiche…"></textarea>
+      </div>
+
+      <button type="button" class="btn-sub" onclick="inviaForm()">
+        Invia per l'analisi <span class="ar">→</span>
+      </button>
+      <p class="btn-note">Risposta su WhatsApp entro 24 ore · Gratuito · Nessun obbligo</p>
+
+    </form>
+
+    <div class="success" id="sb">
+      <div class="si">✅</div>
+      <div class="st">Richiesta ricevuta!</div>
+      <p class="sp">Abbiamo ricevuto il tuo preventivo.<br>Ti contatteremo su <strong>WhatsApp entro 24 ore</strong>.</p>
     </div>
-    <div class="form-group">
-      <label class="form-label">Ambito</label>
-      <select class="form-select" id="t-ambito">
-        <option value="personale">👤 Personale</option>
-        <option value="lavoro">🔧 Lavoro / Azienda</option>
-        <option value="feedet">💡 Feedet</option>
-      </select>
+  </div>
+
+  <div class="trust">
+    <div class="ti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Dati protetti
     </div>
-    <div class="form-group">
-      <label class="form-label">Ricorrente?</label>
-      <select class="form-select" id="t-ricorrente">
-        <option value="no">No</option>
-        <option value="mensile">Mensile</option>
-        <option value="annuale">Annuale</option>
-      </select>
+    <div class="ti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Risposta in 24h
     </div>
-    <div class="form-group">
-      <label class="form-label">Nota (opzionale)</label>
-      <input type="text" class="form-input" id="t-nota" placeholder="Dettagli aggiuntivi…"/>
+    <div class="ti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Sempre gratuito
     </div>
-    <button class="btn btn-primary mt-8" onclick="saveTransazione()">Salva operazione</button>
-    <button class="btn mt-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3)" onclick="closeModal('modal-transazione')">Annulla</button>
+  </div>
+</div>
+```
+
   </div>
 </div>
 
-<!-- Modal: Nuovo lavoro -->
-<div class="modal-overlay" id="modal-lavoro">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuovo lavoro</div>
-    <div class="form-group">
-      <label class="form-label">Cliente *</label>
-      <input type="text" class="form-input" id="l-cliente" placeholder="Nome cliente"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Tipo lavoro *</label>
-      <select class="form-select" id="l-tipo">
-        <option value="sostituzione_caldaia">🔥 Sostituzione caldaia</option>
-        <option value="installazione_caldaia">🔥 Installazione caldaia</option>
-        <option value="impianto_idraulico">🚿 Impianto idraulico</option>
-        <option value="riparazione">🔧 Riparazione</option>
-        <option value="riscaldamento">♨️ Riscaldamento</option>
-        <option value="feedet">💡 Feedet</option>
-        <option value="altro">📦 Altro</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Indirizzo</label>
-      <input type="text" class="form-input" id="l-indirizzo" placeholder="Via, Città"/>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Preventivo (€)</label>
-        <input type="number" class="form-input" id="l-preventivo" placeholder="0" min="0"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Costi mat. (€)</label>
-        <input type="number" class="form-input" id="l-costi" placeholder="0" min="0"/>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Data inizio</label>
-        <input type="date" class="form-input" id="l-data-inizio"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Data fine prev.</label>
-        <input type="date" class="form-input" id="l-data-fine"/>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Stato</label>
-      <select class="form-select" id="l-stato">
-        <option value="preventivo">📋 Preventivo inviato</option>
-        <option value="in_corso">🔄 In corso</option>
-        <option value="completato">✅ Completato</option>
-        <option value="non_pagato">⚠️ Completato — non pagato</option>
-        <option value="annullato">❌ Annullato</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Acconto ricevuto (€)</label>
-      <input type="number" class="form-input" id="l-acconto" placeholder="0" min="0"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Note</label>
-      <textarea class="form-textarea" id="l-note" placeholder="Dettagli cantiere, materiali usati, problemi…"></textarea>
-    </div>
-    <button class="btn btn-primary mt-8" onclick="saveLavoro()">Salva lavoro</button>
-    <button class="btn mt-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3)" onclick="closeModal('modal-lavoro')">Annulla</button>
-  </div>
+<div class="footer">
+  I tuoi dati vengono usati solo per analizzare il preventivo<br>
+  Nessuna cessione a terzi · Nessuno spam
 </div>
 
-<!-- Modal: Nuovo obiettivo -->
-<div class="modal-overlay" id="modal-obiettivo">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuovo obiettivo</div>
-    <div class="form-group">
-      <label class="form-label">Nome obiettivo *</label>
-      <input type="text" class="form-input" id="o-nome" placeholder="Es. Fondo emergenze"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Emoji</label>
-      <input type="text" class="form-input" id="o-emoji" placeholder="🎯" maxlength="2"/>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Target (€) *</label>
-        <input type="number" class="form-input" id="o-target" placeholder="5000" min="0"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Attuale (€)</label>
-        <input type="number" class="form-input" id="o-attuale" placeholder="0" min="0"/>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Tipo</label>
-      <select class="form-select" id="o-tipo">
-        <option value="risparmio">💰 Risparmio</option>
-        <option value="spesa_limite">🚦 Limite di spesa mensile</option>
-        <option value="fatturato">📈 Obiettivo fatturato</option>
-        <option value="debito">📉 Estinzione debito</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Scadenza (opzionale)</label>
-      <input type="date" class="form-input" id="o-scadenza"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nota</label>
-      <input type="text" class="form-input" id="o-nota" placeholder="Perché è importante…"/>
-    </div>
-    <button class="btn btn-primary mt-8" onclick="saveObiettivo()">Salva obiettivo</button>
-    <button class="btn mt-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3)" onclick="closeModal('modal-obiettivo')">Annulla</button>
-  </div>
-</div>
-
-<!-- Modal: Dettaglio lavoro -->
-<div class="modal-overlay" id="modal-lavoro-detail">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div id="lavoro-detail-content"></div>
-    <button class="btn mt-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3)" onclick="closeModal('modal-lavoro-detail')">Chiudi</button>
-  </div>
-</div>
-<!-- Modal selezione tipo -->
-<div class="modal-overlay" id="modal-fab">
-  <div class="modal" style="padding-bottom:24px">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Cosa vuoi aggiungere?</div>
-    <button class="btn btn-primary mb-8" onclick="closeModal('modal-fab');openModal('modal-transazione')">💸 Nuova operazione (entrata/uscita)</button>
-    <button class="btn mb-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--blue)" onclick="closeModal('modal-fab');openModal('modal-lavoro')">🔧 Nuovo lavoro / cantiere</button>
-    <button class="btn mb-8" style="background:var(--bg3);border:1px solid var(--border);color:var(--purple)" onclick="closeModal('modal-fab');openModal('modal-obiettivo')">🎯 Nuovo obiettivo</button>
-    <button class="btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3)" onclick="closeModal('modal-fab')">Annulla</button>
-  </div>
-</div>
-
-<!-- ============================================================ JAVASCRIPT -->
 <script>
-/* ============================================================
-   STORAGE — tutto in localStorage, nessun server esterno
-   Versione: 1.0.0
-   Struttura dati:
-   - ms_transazioni: array di oggetti transazione
-   - ms_lavori: array di oggetti lavoro
-   - ms_obiettivi: array di oggetti obiettivo
-   ============================================================ */
-const KEYS = { T: 'ms_transazioni', L: 'ms_lavori', O: 'ms_obiettivi' };
-
-function load(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
-function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-
-// Stato navigazione
-let currentSection = 'dashboard';
-let currentMonthSpese = new Date();
-let currentMonthSpese_str = () => `${currentMonthSpese.getFullYear()}-${String(currentMonthSpese.getMonth()+1).padStart(2,'0')}`;
-let lavoriFilter = 'tutti';
-let currentType = 'uscita';
-
-// ============================================================ UTILS
-const fmt = (n) => `€ ${parseFloat(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-const fmtShort = (n) => `€ ${parseFloat(n||0).toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
-const today = () => new Date().toISOString().split('T')[0];
-const monthStr = (d) => d.toLocaleString('it-IT',{month:'long',year:'numeric'});
-const catEmoji = { casa:'🏠',cibo:'🍔',trasporti:'🚗',salute:'💊',svago:'🎉',abbigliamento:'👕',formazione:'📚',vizi:'🚬',lavoro_uscita:'🔧',lavoro_entrata:'💰',altro:'📦' };
-const catLabel = { casa:'Casa',cibo:'Cibo',trasporti:'Trasporti',salute:'Salute',svago:'Svago',abbigliamento:'Abbigliamento',formazione:'Formazione',vizi:'Vizi',lavoro_uscita:'Costi lavoro',lavoro_entrata:'Entrata lavoro',altro:'Altro' };
-const statoLabel = { preventivo:'Preventivo',in_corso:'In corso',completato:'Completato',non_pagato:'Non pagato',annullato:'Annullato' };
-const statoBadge = { preventivo:'badge-purple',in_corso:'badge-orange',completato:'badge-green',non_pagato:'badge-red',annullato:'badge-red' };
-const catColors = { casa:'#60a5fa',cibo:'#fb923c',trasporti:'#a78bfa',salute:'#34d399',svago:'#f472b6',abbigliamento:'#fbbf24',formazione:'#22d3ee',vizi:'#f87171',lavoro_uscita:'#94a3b8',lavoro_entrata:'#4ade80',altro:'#6b7280' };
-function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-
-// ============================================================ NAV
-function showSection(name) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('sec-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  currentSection = name;
-  render();
-}
-
-// ============================================================ MODALI
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function openFab() { openModal('modal-fab'); }
-
-// Click fuori per chiudere
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
-});
-
-// ============================================================ TIPO TRANSAZIONE
-function setType(t) {
-  currentType = t;
-  document.getElementById('tb-uscita').className = 'type-btn' + (t==='uscita' ? ' active-uscita':'');
-  document.getElementById('tb-entrata').className = 'type-btn' + (t==='entrata' ? ' active-entrata':'');
-  // suggerisci categoria
-  if (t==='entrata') document.getElementById('t-cat').value = 'lavoro_entrata';
-  else document.getElementById('t-cat').value = 'altro';
-}
-
-// ============================================================ SALVA TRANSAZIONE
-function saveTransazione() {
-  const imp = parseFloat(document.getElementById('t-importo').value);
-  const desc = document.getElementById('t-desc').value.trim();
-  const data = document.getElementById('t-data').value;
-  if (!imp || imp <= 0 || !desc || !data) { alert('Compila importo, descrizione e data'); return; }
-  const t = {
-    id: genId(), tipo: currentType, importo: imp,
-    descrizione: desc, data, categoria: document.getElementById('t-cat').value,
-    pagamento: document.getElementById('t-pag').value,
-    ambito: document.getElementById('t-ambito').value,
-    ricorrente: document.getElementById('t-ricorrente').value,
-    nota: document.getElementById('t-nota').value.trim(),
-    creata: new Date().toISOString()
-  };
-  const arr = load(KEYS.T); arr.unshift(t); save(KEYS.T, arr);
-  closeModal('modal-transazione');
-  resetTransazioneForm();
-  render();
-}
-
-function resetTransazioneForm() {
-  ['t-importo','t-desc','t-nota'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('t-data').value = today();
-  setType('uscita');
-}
-
-// ============================================================ SALVA LAVORO
-function saveLavoro() {
-  const cliente = document.getElementById('l-cliente').value.trim();
-  if (!cliente) { alert('Inserisci il nome del cliente'); return; }
-  const l = {
-    id: genId(), cliente,
-    tipo: document.getElementById('l-tipo').value,
-    indirizzo: document.getElementById('l-indirizzo').value.trim(),
-    preventivo: parseFloat(document.getElementById('l-preventivo').value)||0,
-    costi: parseFloat(document.getElementById('l-costi').value)||0,
-    dataInizio: document.getElementById('l-data-inizio').value,
-    dataFine: document.getElementById('l-data-fine').value,
-    stato: document.getElementById('l-stato').value,
-    acconto: parseFloat(document.getElementById('l-acconto').value)||0,
-    note: document.getElementById('l-note').value.trim(),
-    creato: new Date().toISOString()
-  };
-  const arr = load(KEYS.L); arr.unshift(l); save(KEYS.L, arr);
-  closeModal('modal-lavoro');
-  ['l-cliente','l-indirizzo','l-note'].forEach(id => document.getElementById(id).value='');
-  ['l-preventivo','l-costi','l-acconto'].forEach(id => document.getElementById(id).value='');
-  ['l-data-inizio','l-data-fine'].forEach(id => document.getElementById(id).value='');
-  render();
-}
-
-// ============================================================ SALVA OBIETTIVO
-function saveObiettivo() {
-  const nome = document.getElementById('o-nome').value.trim();
-  const target = parseFloat(document.getElementById('o-target').value)||0;
-  if (!nome || !target) { alert('Inserisci nome e target'); return; }
-  const o = {
-    id: genId(), nome,
-    emoji: document.getElementById('o-emoji').value || '🎯',
-    target, attuale: parseFloat(document.getElementById('o-attuale').value)||0,
-    tipo: document.getElementById('o-tipo').value,
-    scadenza: document.getElementById('o-scadenza').value,
-    nota: document.getElementById('o-nota').value.trim(),
-    creato: new Date().toISOString()
-  };
-  const arr = load(KEYS.O); arr.push(o); save(KEYS.O, arr);
-  closeModal('modal-obiettivo');
-  ['o-nome','o-emoji','o-target','o-attuale','o-scadenza','o-nota'].forEach(id => document.getElementById(id).value='');
-  render();
-}
-
-// ============================================================ DELETE
-function deleteTransazione(id) {
-  if (!confirm('Eliminare questa operazione?')) return;
-  save(KEYS.T, load(KEYS.T).filter(t => t.id !== id)); render();
-}
-function deleteLavoro(id) {
-  if (!confirm('Eliminare questo lavoro?')) return;
-  save(KEYS.L, load(KEYS.L).filter(l => l.id !== id)); render();
-}
-function deleteObiettivo(id) {
-  if (!confirm('Eliminare questo obiettivo?')) return;
-  save(KEYS.O, load(KEYS.O).filter(o => o.id !== id)); render();
-}
-
-// Aggiorna progresso obiettivo
-function updateObjProgress(id) {
-  const arr = load(KEYS.O);
-  const idx = arr.findIndex(o => o.id === id);
-  if (idx < 0) return;
-  const val = parseFloat(prompt('Valore attuale (€):', arr[idx].attuale)||arr[idx].attuale);
-  if (isNaN(val)) return;
-  arr[idx].attuale = val; save(KEYS.O, arr); render();
-}
-
-// Cambia stato lavoro
-function changeStatoLavoro(id, newStato) {
-  const arr = load(KEYS.L);
-  const idx = arr.findIndex(l => l.id === id);
-  if (idx < 0) return;
-  arr[idx].stato = newStato; save(KEYS.L, arr); render();
-  closeModal('modal-lavoro-detail');
-}
-
-// Apri dettaglio lavoro
-function openLavoroDetail(id) {
-  const lavori = load(KEYS.L);
-  const l = lavori.find(x => x.id === id);
-  if (!l) return;
-  const margine = l.preventivo > 0 ? Math.round(((l.preventivo - l.costi) / l.preventivo) * 100) : 0;
-  const daIncassare = l.preventivo - l.acconto;
-  const cont = document.getElementById('lavoro-detail-content');
-  cont.innerHTML = `
-    <div class="modal-title">${l.cliente}</div>
-    <div class="flex-between mb-8">
-      <span class="badge ${statoBadge[l.stato]}">${statoLabel[l.stato]}</span>
-      <span class="text-muted text-sm">${l.dataInizio||'—'}</span>
-    </div>
-    ${l.indirizzo ? `<div class="text-sm text-muted mb-8">📍 ${l.indirizzo}</div>` : ''}
-    <div class="stats-row" style="margin-bottom:14px">
-      <div class="stat-card"><div class="s-label">Preventivo</div><div class="s-value">${fmtShort(l.preventivo)}</div></div>
-      <div class="stat-card"><div class="s-label">Costi mat.</div><div class="s-value r">${fmtShort(l.costi)}</div></div>
-      <div class="stat-card"><div class="s-label">Margine</div><div class="s-value ${margine>30?'g':margine>15?'o':'r'}">${margine}%</div></div>
-      <div class="stat-card"><div class="s-label">Da incassare</div><div class="s-value o">${fmtShort(daIncassare)}</div></div>
-    </div>
-    ${l.note ? `<div class="card" style="margin-bottom:14px"><div class="card-title">Note cantiere</div><div class="text-sm" style="color:var(--text2);line-height:1.6">${l.note}</div></div>` : ''}
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-title">Cambia stato</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="badge badge-purple" style="cursor:pointer;padding:8px" onclick="changeStatoLavoro('${id}','preventivo')">📋 Preventivo</button>
-        <button class="badge badge-orange" style="cursor:pointer;padding:8px" onclick="changeStatoLavoro('${id}','in_corso')">🔄 In corso</button>
-        <button class="badge badge-green" style="cursor:pointer;padding:8px" onclick="changeStatoLavoro('${id}','completato')">✅ Completato</button>
-        <button class="badge badge-red" style="cursor:pointer;padding:8px" onclick="changeStatoLavoro('${id}','non_pagato')">⚠️ Non pagato</button>
-      </div>
-    </div>
-    <button class="btn btn-danger" onclick="deleteLavoro('${id}');closeModal('modal-lavoro-detail')">Elimina lavoro</button>
-  `;
-  openModal('modal-lavoro-detail');
-}
-
-// ============================================================ FILTRO LAVORI
-function filterLavori(f) { lavoriFilter = f; renderLavori(); }
-
-// ============================================================ MESE
-function changeMonth(ctx, delta) {
-  if (ctx === 'spese') {
-    currentMonthSpese = new Date(currentMonthSpese.getFullYear(), currentMonthSpese.getMonth() + delta, 1);
-    renderSpese();
+function toggleImporto() {
+  var si = document.getElementById('rsi');
+  var wrap = document.getElementById('iw');
+  if (si && si.checked) {
+    wrap.classList.add('on');
+  } else {
+    wrap.classList.remove('on');
   }
 }
 
-// ============================================================ BACKUP
-function exportBackup() {
-  const data = {
-    version: '1.0.0', exportedAt: new Date().toISOString(),
-    transazioni: load(KEYS.T), lavori: load(KEYS.L), obiettivi: load(KEYS.O)
+function inviaForm() {
+  var nome = document.getElementById('nome').value.trim();
+  var prov = document.getElementById('prov').value.trim();
+  var lav  = document.getElementById('lav').value;
+  var tel  = document.getElementById('tel').value.trim();
+  var si   = document.getElementById('rsi').checked;
+  var no   = document.getElementById('rno').checked;
+  var imp  = document.getElementById('imp').value;
+  var note = document.getElementById('note').value.trim();
+
+  if (!nome) { alert('Inserisci il tuo nome'); return; }
+  if (!prov) { alert('Inserisci la provincia'); return; }
+  if (!lav)  { alert('Seleziona il tipo di lavoro'); return; }
+  if (!tel)  { alert('Inserisci il tuo numero WhatsApp'); return; }
+  if (!si && !no) { alert('Indica se hai gia un preventivo'); return; }
+
+  var tipiLavoro = {
+    sostituzione_caldaia: 'Sostituzione caldaia',
+    installazione_caldaia: 'Installazione caldaia nuova',
+    impianto_idraulico: 'Impianto idraulico bagno/cucina',
+    riparazione: 'Riparazione impianto',
+    riscaldamento: 'Impianto riscaldamento',
+    elettrico: 'Impianto elettrico',
+    ristrutturazione: 'Ristrutturazione',
+    altro: 'Altro'
   };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `mio-sistema-backup-${today()}.json`; a.click();
-  URL.revokeObjectURL(url);
-}
 
-function importBackup() {
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = '.json';
-  input.onchange = e => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!confirm(`Importare backup del ${data.exportedAt}?\nSovrascriverà i dati attuali.`)) return;
-        if (data.transazioni) save(KEYS.T, data.transazioni);
-        if (data.lavori) save(KEYS.L, data.lavori);
-        if (data.obiettivi) save(KEYS.O, data.obiettivi);
-        render(); alert('Backup importato con successo!');
-      } catch { alert('File non valido'); }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
+  var haPreventivo = si ? 'Si' : 'No - cerca preventivo';
+  var tipoLabel = tipiLavoro[lav] || lav;
 
-// ============================================================ RENDER PRINCIPALE
-function render() {
-  renderDashboard();
-  renderSpese();
-  renderLavori();
-  renderObiettivi();
-}
+  // Invia a Formspree
+  var formData = new FormData();
+  formData.append('Nome', nome);
+  formData.append('Provincia', prov);
+  formData.append('Telefono_WhatsApp', tel);
+  formData.append('Tipo_lavoro', tipoLabel);
+  formData.append('Ha_preventivo', haPreventivo);
+  if (si && imp) formData.append('Importo_euro', imp);
+  if (note) formData.append('Note', note);
 
-// ============================================================ RENDER DASHBOARD
-function renderDashboard() {
-  const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const transazioni = load(KEYS.T);
-  const lavori = load(KEYS.L);
-  const obiettivi = load(KEYS.O);
-
-  document.getElementById('dash-date').textContent = now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('dash-month-label').textContent = monthStr(now);
-
-  // Calcoli mese
-  const meseTx = transazioni.filter(t => t.data.startsWith(monthKey));
-  const entrate = meseTx.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.importo,0);
-  const uscite  = meseTx.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.importo,0);
-  const saldo   = entrate - uscite;
-
-  // Saldo display
-  const saldoEl = document.getElementById('dash-saldo');
-  saldoEl.textContent = fmt(saldo);
-  saldoEl.className = 'balance-amount ' + (saldo>0?'positive':saldo<0?'negative':'neutral');
-  document.getElementById('dash-saldo-sub').textContent = `${fmt(entrate)} entrate — ${fmt(uscite)} uscite`;
-
-  document.getElementById('dash-entrate').textContent = fmtShort(entrate);
-  document.getElementById('dash-uscite').textContent  = fmtShort(uscite);
-
-  // Lavori attivi
-  const lavoriAttivi = lavori.filter(l => l.stato === 'in_corso').length;
-  document.getElementById('dash-lavori-attivi').textContent = lavoriAttivi;
-
-  // Da incassare
-  const daInc = lavori.filter(l => l.stato === 'non_pagato' || l.stato === 'completato')
-    .reduce((s,l) => s + (l.preventivo - l.acconto), 0);
-  document.getElementById('dash-da-incassare').textContent = fmtShort(daInc);
-
-  // Alert intelligenti
-  const alerts = [];
-  const vizi = meseTx.filter(t=>t.tipo==='uscita'&&t.categoria==='vizi').reduce((s,t)=>s+t.importo,0);
-  if (vizi > 100) alerts.push({type:'warn', msg:`<strong>Categoria Vizi:</strong> ${fmt(vizi)} questo mese — stai attento`});
-  const svago = meseTx.filter(t=>t.tipo==='uscita'&&t.categoria==='svago').reduce((s,t)=>s+t.importo,0);
-  if (svago > 300) alerts.push({type:'warn', msg:`<strong>Svago:</strong> ${fmt(svago)} questo mese — sopra la soglia tipica`});
-  lavori.filter(l=>l.stato==='non_pagato').forEach(l => {
-    alerts.push({type:'warn', msg:`<strong>${l.cliente}</strong> — lavoro completato non pagato (${fmt(l.preventivo - l.acconto)})`});
+  fetch('https://formspree.io/f/mlgoobnd', {
+    method: 'POST',
+    body: formData,
+    headers: { 'Accept': 'application/json' }
+  }).then(function(response) {
+    if (response.ok) {
+      document.getElementById('ff').style.display = 'none';
+      document.getElementById('sb').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      alert('Errore invio. Riprova o contattaci su WhatsApp.');
+    }
+  }).catch(function() {
+    alert('Errore di connessione. Riprova.');
   });
-  lavori.filter(l=>l.stato==='preventivo').forEach(l => {
-    const gg = Math.floor((Date.now()-new Date(l.creato))/86400000);
-    if (gg > 7) alerts.push({type:'info', msg:`<strong>${l.cliente}</strong> — preventivo inviato ${gg} giorni fa, nessuna risposta`});
-  });
-  if (saldo < -200) alerts.push({type:'warn', msg:`Saldo mensile negativo: <strong>${fmt(saldo)}</strong>`});
-  obiettivi.forEach(o => {
-    const pct = o.target > 0 ? Math.round((o.attuale/o.target)*100) : 0;
-    if (pct >= 100) alerts.push({type:'ok', msg:`Obiettivo <strong>${o.nome}</strong> raggiunto! 🎉`});
-    else if (pct >= 80) alerts.push({type:'info', msg:`Obiettivo <strong>${o.nome}</strong> all'${pct}% — quasi!`});
-  });
-
-  const alertsEl = document.getElementById('dash-alerts');
-  if (alerts.length === 0) {
-    alertsEl.innerHTML = '<div class="empty-state"><div class="e-icon">✅</div><div class="e-text">Nessun alert — tutto sotto controllo</div></div>';
-  } else {
-    alertsEl.innerHTML = alerts.map(a => `
-      <div class="alert-item">
-        <div class="alert-dot ${a.type}"></div>
-        <div class="alert-text">${a.msg}</div>
-      </div>`).join('');
-  } // Ultime 5 transazioni
-  const recentEl = document.getElementById('dash-recent');
-  const recent = transazioni.slice(0,5);
-  if (recent.length === 0) {
-    recentEl.innerHTML = '<div class="empty-state"><div class="e-icon">💸</div><div class="e-text">Nessuna operazione ancora.<br>Premi + per aggiungerne una.</div></div>';
-  } else {
-    recentEl.innerHTML = recent.map(t => `
-      <div class="tx-item">
-        <div class="tx-left">
-          <div class="tx-icon">${catEmoji[t.categoria]||'📦'}</div>
-          <div>
-            <div class="tx-name">${t.descrizione}</div>
-            <div class="tx-cat">${catLabel[t.categoria]||'Altro'} · ${t.data}</div>
-          </div>
-        </div>
-        <div class="tx-amount ${t.tipo==='uscita'?'neg':'pos'}">${t.tipo==='uscita'?'-':'+'} ${fmt(t.importo)}</div>
-      </div>`).join('');
-  }
-
-  // Obiettivi mini
-  const objEl = document.getElementById('dash-obiettivi');
-  if (obiettivi.length === 0) {
-    objEl.innerHTML = '<div class="text-sm text-muted">Nessun obiettivo. Aggiungine uno dalla sezione Obiettivi.</div>';
-  } else {
-    objEl.innerHTML = obiettivi.slice(0,3).map(o => {
-      const pct = Math.min(100, o.target > 0 ? Math.round((o.attuale/o.target)*100) : 0);
-      const color = pct >= 100 ? 'green' : pct >= 60 ? 'accent' : pct >= 30 ? 'orange' : 'red';
-      return `
-        <div style="margin-bottom:12px">
-          <div class="flex-between" style="margin-bottom:4px">
-            <span style="font-size:0.85rem;font-weight:600">${o.emoji} ${o.nome}</span>
-            <span class="font-mono text-sm">${pct}%</span>
-          </div>
-          <div class="progress-bar-wrap"><div class="progress-bar ${color}" style="width:${pct}%"></div></div>
-          <div class="flex-between" style="margin-top:3px">
-            <span class="text-sm text-muted">${fmt(o.attuale)}</span>
-            <span class="text-sm text-muted">${fmt(o.target)}</span>
-          </div>
-        </div>`;
-    }).join('');
-  }
 }
-
-// ============================================================ RENDER SPESE
-function renderSpese() {
-  document.getElementById('spese-month-label').textContent = monthStr(currentMonthSpese);
-  const mKey = currentMonthSpese_str();
-  const transazioni = load(KEYS.T).filter(t => t.data.startsWith(mKey));
-
-  const uscite  = transazioni.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.importo,0);
-  const entrate = transazioni.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.importo,0);
-  document.getElementById('sp-tot-uscite').textContent  = fmtShort(uscite);
-  document.getElementById('sp-tot-entrate').textContent = fmtShort(entrate);
-
-  // Analisi categorie
-  const catMap = {};
-  transazioni.filter(t=>t.tipo==='uscita').forEach(t => {
-    catMap[t.categoria] = (catMap[t.categoria]||0) + t.importo;
-  });
-  const catArr = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
-  const maxCat = catArr[0]?.[1] || 1;
-  const catEl = document.getElementById('sp-cat-analysis');
-  if (catArr.length === 0) {
-    catEl.innerHTML = '<div class="text-sm text-muted">Nessuna uscita questo mese</div>';
-  } else {
-    catEl.innerHTML = catArr.map(([cat, val]) => `
-      <div class="cat-bar-row">
-        <div class="cat-bar-label">${catEmoji[cat]||'📦'} ${catLabel[cat]||cat}</div>
-        <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${(val/maxCat)*100}%;background:${catColors[cat]||'#888'};height:6px;border-radius:100px"></div></div>
-        <div class="cat-bar-val">${fmtShort(val)}</div>
-      </div>`).join('');
-  }
-
-  // Lista transazioni
-  const listEl = document.getElementById('sp-list');
-  if (transazioni.length === 0) {
-    listEl.innerHTML = '<div class="empty-state"><div class="e-icon">📭</div><div class="e-text">Nessuna operazione questo mese</div></div>';
-    return;
-  }
-  // Raggruppa per data
-  const byDate = {};
-  transazioni.forEach(t => { if (!byDate[t.data]) byDate[t.data]=[];  byDate[t.data].push(t); });
-  const sorted = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
-  listEl.innerHTML = sorted.map(date => `
-    <div style="font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 8px">${new Date(date+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}</div>
-    ${byDate[date].map(t => `
-      <div class="list-item" style="cursor:default">
-        <div style="font-size:1.2rem;flex-shrink:0">${catEmoji[t.categoria]||'📦'}</div>
-        <div class="list-item-info">
-          <div class="list-item-title">${t.descrizione}</div>
-          <div class="list-item-meta">${catLabel[t.categoria]||'Altro'} · ${t.pagamento} · ${t.ambito}</div>
-          ${t.nota?`<div class="list-item-meta" style="margin-top:2px;font-style:italic">${t.nota}</div>`:''}
-        </div>
-        <div class="list-item-right">
-          <div class="list-item-amount ${t.tipo==='uscita'?'text-red':'text-green'}">${t.tipo==='uscita'?'-':'+'} ${fmt(t.importo)}</div>
-          <button onclick="deleteTransazione('${t.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.75rem;margin-top:4px">✕</button>
-        </div>
-      </div>`).join('')}
-  `).join('');
-}
-
-// ============================================================ RENDER LAVORI
-function renderLavori() {
-  let lavori = load(KEYS.L);
-
-  // Stats totali
-  const completati = lavori.filter(l=>l.stato==='completato'||l.stato==='non_pagato');
-  const fatturatoTot = completati.reduce((s,l)=>s+l.preventivo,0);
-  const pendente = lavori.filter(l=>l.stato==='non_pagato').reduce((s,l)=>s+(l.preventivo-l.acconto),0);
-  const margini = completati.filter(l=>l.preventivo>0).map(l=>((l.preventivo-l.costi)/l.preventivo)*100);
-  const margMedio = margini.length>0 ? Math.round(margini.reduce((s,v)=>s+v,0)/margini.length) : 0;
-  document.getElementById('lav-fatturato').textContent = fmtShort(fatturatoTot);
-  document.getElementById('lav-pendente').textContent  = fmtShort(pendente);
-  document.getElementById('lav-margine').textContent   = margMedio + '%';
-  document.getElementById('lav-count').textContent     = lavori.length;
-
-  // Filtro
-  if (lavoriFilter !== 'tutti') lavori = lavori.filter(l => l.stato === lavoriFilter);
-
-  const listEl = document.getElementById('lav-list');
-  if (lavori.length === 0) {
-    listEl.innerHTML = '<div class="empty-state"><div class="e-icon">🔧</div><div class="e-text">Nessun lavoro trovato.<br>Premi + per aggiungerne uno.</div></div>';
-    return;
-  }
-  listEl.innerHTML = lavori.map(l => {
-    const margine = l.preventivo > 0 ? Math.round(((l.preventivo-l.costi)/l.preventivo)*100) : null;
-    const daInc = l.preventivo - l.acconto;
-    return `
-      <div class="list-item" style="cursor:pointer" onclick="openLavoroDetail('${l.id}')">
-        <div class="list-item-info">
-          <div class="list-item-title">${l.cliente}</div>
-          <div class="list-item-meta">${l.tipo.replace(/_/g,' ')} ${l.dataInizio?'· '+l.dataInizio:''}</div>
-          <div style="margin-top:6px"><span class="badge ${statoBadge[l.stato]}">${statoLabel[l.stato]}</span></div>
-        </div>
-        <div class="list-item-right">
-          <div class="list-item-amount">${fmtShort(l.preventivo)}</div>
-          ${margine!==null?`<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Margine: ${margine}%</div>`:''}
-          ${daInc>0&&l.stato!=='preventivo'&&l.stato!=='annullato'?`<div style="font-size:0.72rem;color:var(--orange);margin-top:2px">Da inc.: ${fmtShort(daInc)}</div>`:''}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ============================================================ RENDER OBIETTIVI
-function renderObiettivi() {
-  const obiettivi = load(KEYS.O);
-  const transazioni = load(KEYS.T);
-
-  // Analisi abitudini
-  const habitEl = document.getElementById('habit-content');
-  const ultimi3 = [];
-  for (let i=0; i<3; i++) {
-    const d = new Date(); d.setMonth(d.getMonth()-i);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const uscite = transazioni.filter(t=>t.tipo==='uscita'&&t.data.startsWith(key)).reduce((s,t)=>s+t.importo,0);
-    ultimi3.push({mese:monthStr(d).split(' ')[0], uscite});
-  }
-
-  // Categoria più costosa
-  const catTot = {};
-  transazioni.filter(t=>t.tipo==='uscita').forEach(t=>{ catTot[t.categoria]=(catTot[t.categoria]||0)+t.importo; });
-  const topCat = Object.entries(catTot).sort((a,b)=>b[1]-a[1])[0];
-
-  // Vizi negli ultimi 30gg
-  const d30 = new Date(); d30.setDate(d30.getDate()-30);
-  const viziRecent = transazioni.filter(t=>t.tipo==='uscita'&&t.categoria==='vizi'&&new Date(t.data)>=d30).reduce((s,t)=>s+t.importo,0);
-
-  // Impulsivi (< 20€, categoria svago o vizi)
-  const impulsivi = transazioni.filter(t=>t.tipo==='uscita'&&t.importo<20&&(t.categoria==='svago'||t.categoria==='vizi'));
-
-  if (transazioni.length < 3) {
-    habitEl.innerHTML = '<div class="text-sm text-muted">Inserisci almeno qualche transazione per vedere l\'analisi delle tue abitudini 📊</div>';
-  } else {
-    habitEl.innerHTML = `
-      <div class="text-sm" style="margin-bottom:10px">
-        ${topCat ? `🔍 La tua categoria di spesa maggiore è <strong style="color:var(--accent)">${catEmoji[topCat[0]]} ${catLabel[topCat[0]]}</strong> con ${fmt(topCat[1])} totali.` : ''}
-      </div>
-      ${viziRecent > 0 ? `<div class="text-sm" style="margin-bottom:10px">🚬 Hai speso <strong style="color:var(--red)">${fmt(viziRecent)}</strong> in vizi negli ultimi 30 giorni.</div>` : ''}
-      ${impulsivi.length > 5 ? `<div class="text-sm" style="margin-bottom:10px">⚡ Rilevati <strong style="color:var(--orange)">${impulsivi.length} acquisti impulsivi</strong> sotto i 20€ — in totale ${fmt(impulsivi.reduce((s,t)=>s+t.importo,0))}.</div>` : ''}
-      <div class="text-sm" style="color:var(--text3)">Ultimi 3 mesi: ${ultimi3.map(m=>`${m.mese} ${fmtShort(m.uscite)}`).join(' → ')}</div>
-    `;
-  }
-
-  // Lista obiettivi
-  const objEl = document.getElementById('obj-list');
-  if (obiettivi.length === 0) {
-    objEl.innerHTML = '<div class="empty-state"><div class="e-icon">🎯</div><div class="e-text">Nessun obiettivo ancora.<br>Premi + per aggiungerne uno.</div></div>';
-    return;
-  }
-  objEl.innerHTML = obiettivi.map(o => {
-    const pct = Math.min(100, o.target>0 ? Math.round((o.attuale/o.target)*100) : 0);
-    const color = pct>=100?'green':pct>=60?'accent':pct>=30?'orange':'red';
-    const restante = Math.max(0, o.target - o.attuale);
-    const scad = o.scadenza ? ` · Scadenza: ${new Date(o.scadenza+'T12:00').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'})}` : '';
-    return `
-      <div class="obj-card">
-        <div class="obj-header">
-          <div>
-            <div class="obj-emoji">${o.emoji}</div>
-            <div class="obj-name">${o.nome}</div>
-            ${o.nota?`<div class="text-sm text-muted mt-4">${o.nota}</div>`:''}
-          </div>
-          <div style="text-align:right">
-            <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--accent)">${pct}%</div>
-            ${pct>=100?'<div style="font-size:0.75rem;color:var(--green)">✅ Raggiunto!</div>':''}
-          </div>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar ${color}" style="width:${pct}%"></div></div>
-        <div class="obj-amounts">
-          <span class="current">${fmt(o.attuale)}</span>
-          <span>${pct<100?`Mancano ${fmt(restante)}`:''}</span>
-          <span class="target">${fmt(o.target)}</span>
-        </div>
-        ${scad?`<div class="text-sm text-muted mt-4">${scad}</div>`:''}
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-sm btn-primary" style="flex:1" onclick="updateObjProgress('${o.id}')">Aggiorna</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteObiettivo('${o.id}')">Elimina</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ============================================================ INIT
-document.addEventListener('DOMContentLoaded', () => {
-  // Imposta data di oggi nel form transazione
-  document.getElementById('t-data').value = today();
-  document.getElementById('l-data-inizio').value = today();
-// Data header
-  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-
-  render();
-});
 </script>
 
 </body>
